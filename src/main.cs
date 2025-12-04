@@ -1,65 +1,80 @@
-class Program
+using System.Text;
+
+HashSet<string> builtin = ["exit", "echo", "type"];
+
+string input = "";
+while (input != "exit")
 {
-    static public string[] commandsList = ["exit", "echo", "type"];
-    static void Main()
+    input = Read();
+    if (input == "exit") break;
+    else if (input.Length == 0) return;
+    var (command, arguments) = ParseInput(input);
+    Evaluate(command, arguments);
+}
+
+string Read()
+{
+    Console.Write("$ ");
+    string input = Console.ReadLine() ?? "";
+
+    return input;
+}
+
+(string command, string arguments) ParseInput(string input)
+{
+    StringBuilder command = new();
+
+    foreach (char c in input)
     {
-        string input = "";
-        while (input != "exit")
+        if (c == ' ' && command.Length > 0)
         {
-            input = Read();
-            if (input == "exit") break;
-            Evaluate(input);
-        }
-    }
-
-    static string Read()
-    {
-        Console.Write("$ ");
-        string input = Console.ReadLine() ?? "";
-
-        return input;
-    }
-
-    static void Evaluate(string input)
-    {
-        if (input.Length == 0) return;
-
-        string[] args = input.Split(" ");
-        string command = args[0];
-
-        if (command == "echo")
-        {
-            Echo(args[1..]);
-        }
-        else if (command == "type")
-        {
-            Type(args[1]);
+            break;
         }
         else
         {
-            CommandNotFound(command);
+            command.Append(c);
         }
     }
 
-    static void Echo(string[] args)
-    {
-        Console.WriteLine(string.Join(" ", args));
-    }
+    string arguments = input[command.Length..].Trim(' ');
 
-    static void Type(string commandName)
-    {
-        if (commandsList.Contains(commandName))
-        {
-            Console.WriteLine($"{commandName} is a shell builtin");
-        }
-        else
-        {
-            CommandNotFound(commandName);
-        }
-    }
+    return (command.ToString(), arguments);
+}
 
-    static void CommandNotFound(string command)
+void Evaluate(string command, string arguments)
+{
+    if (command == "echo")
     {
-        Console.WriteLine($"{command}: not found");
+        Echo(arguments);
     }
+    else if (command == "type")
+    {
+        Type(arguments);
+    }
+    else
+    {
+        CommandNotFound(command);
+    }
+}
+
+void Echo(string arguments)
+{
+    Console.WriteLine(string.Join(" ", arguments));
+}
+
+void Type(string command)
+{
+    if (builtin.Contains(command))
+    {
+        Console.WriteLine($"{command} is a shell builtin");
+    }
+    else
+    {
+        CommandNotFound(command);
+    }
+}
+
+void CommandNotFound(string command)
+{
+    Console.WriteLine($"{command}: not found");
 }
