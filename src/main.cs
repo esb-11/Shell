@@ -2,10 +2,12 @@ class Program
 {
     static void Main()
     {
-        string input = Read();
+        string input = "";
         while (input != "exit")
         {
             input = Read();
+            if (input == "exit") break;
+            Evaluate(input);
         }
     }
 
@@ -14,19 +16,28 @@ class Program
         Console.Write("$ ");
         string input = Console.ReadLine() ?? "";
 
-        if (input.Length > 0 && !ValidateCommand(input))
-            Console.WriteLine($"{input}: command not found");
-
         return input;
     }
 
-    static bool ValidateCommand(string command)
+    static void Evaluate(string input)
     {
-        if (command == "exit")
+        if (input.Length == 0) return;
+        
+        string[] args = input.Split(" ");
+        string command = args[0];
+        
+        if (command == "echo")
         {
-            return true;
+            Echo(args[1..]);
         }
+        else
+        {
+            Console.WriteLine($"{command}: command not found");
+        }
+    }
 
-        return false;
+    static void Echo(string[] args)
+    {
+        Console.WriteLine(string.Join(" ", args));
     }
 }
