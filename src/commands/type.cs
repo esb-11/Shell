@@ -10,7 +10,7 @@ public class Type
             }
             else
             {
-                string result = SearchPath(arg);
+                string result = Shell.SearchPath(arg);
                 if (result != "")
                 {
                     Console.WriteLine($"{arg} is {result}");
@@ -23,17 +23,4 @@ public class Type
         }
     }
 
-    static string SearchPath(string command)
-    {
-        foreach (var dir in Shell.PATH)
-        {
-            string fileName = $"{dir}/{command}";
-            if (Shell.PathBinaries.Contains(fileName))
-            {
-                return fileName;
-            }
-        }
-        
-        return "";
-    }
 }

@@ -1,8 +1,9 @@
 using System.Text;
+using System.Diagnostics;
 
 class Shell
 {
-    public static Boolean Exit = false;
+    public static Boolean End = false;
     public static readonly HashSet<string> BuiltinCommands = [];
     public static string[] PATH = [];
     public static readonly HashSet<string> PathBinaries = [];
@@ -13,11 +14,10 @@ class Shell
         PATH = Environment.GetEnvironmentVariable("PATH")?.Split(":") ?? [];
         LoadPathBinaries();
         LoadBuiltinCommands();
-        while (!Exit)
+        while (!End)
         {
             string input = Read();
-            if (input == "exit") break;
-            else if (input.Length == 0) continue;
+            if (input.Length == 0) continue;
             var (command, arguments) = ParseInput(input);
             Evaluate(command, arguments);
         }
@@ -71,9 +71,36 @@ class Shell
         {
             Type.Execute(arguments);
         }
+        else if (command == "exit")
+        {
+            Exit.Execute();
+        }
         else
         {
-            CommandNotFound(command);
+            string commandPath = SearchPath(command);
+            if (commandPath.Length > 0)
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = command,
+                    Arguments = string.Join(" ", arguments),
+                    RedirectStandardOutput = true,
+                };
+
+                using (var process = new Process())
+                {
+                    process.StartInfo = startInfo;
+                    process.Start();
+
+                    string output = process.StandardOutput.ReadToEnd();
+                    process.WaitForExit();
+                    Console.Write(output);
+                }
+            }
+            else
+            {
+                CommandNotFound(command);
+            }
         }
     }
 
@@ -119,4 +146,17 @@ class Shell
         }
     }
 
+    public static string SearchPath(string command)
+    {
+        foreach (var dir in PATH)
+        {
+            string fileName = $"{dir}/{command}";
+            if (PathBinaries.Contains(fileName))
+            {
+                return fileName;
+            }
+        }
+
+        return "";
+    }
 }
