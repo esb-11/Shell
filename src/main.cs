@@ -110,8 +110,10 @@ class Shell
             foreach (var file in files)
             {
                 UnixFileMode fileMode = File.GetUnixFileMode(file);
-                Console.WriteLine(fileMode);
-                PathBinaries.Add(file);
+                if ((fileMode & UnixFileMode.UserExecute) == UnixFileMode.UserExecute)
+                {
+                    PathBinaries.Add(file);
+                }
             }
 
         }
