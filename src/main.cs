@@ -8,9 +8,11 @@ class Shell
     public static string[] PATH = [];
     public static readonly HashSet<string> PathBinaries = [];
     public static readonly string BuiltinPath = "src/commands";
+    public static string WorkingDirectory = "";
 
     static void Main(string[] args)
     {
+        WorkingDirectory = Directory.GetCurrentDirectory();
         PATH = Environment.GetEnvironmentVariable("PATH")?.Split(":") ?? [];
         LoadPathBinaries();
         LoadBuiltinCommands();
@@ -63,44 +65,26 @@ class Shell
 
     static void Evaluate(string command, string[] arguments)
     {
-        if (command == "echo")
+        switch (command)
         {
-            Echo.Execute(arguments);
-        }
-        else if (command == "type")
-        {
-            Type.Execute(arguments);
-        }
-        else if (command == "exit")
-        {
-            Exit.Execute();
-        }
-        else
-        {
-            string commandPath = SearchPath(command);
-            if (commandPath.Length > 0)
-            {
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = command,
-                    Arguments = string.Join(" ", arguments),
-                    RedirectStandardOutput = true,
-                };
-
-                using (var process = new Process())
-                {
-                    process.StartInfo = startInfo;
-                    process.Start();
-
-                    string output = process.StandardOutput.ReadToEnd();
-                    process.WaitForExit();
-                    Console.Write(output);
-                }
-            }
-            else
-            {
-                CommandNotFound(command);
-            }
+            case "echo":
+                Echo.Execute(arguments);
+                break;
+            case "type":
+                Type.Execute(arguments);
+                break;
+            case "exit":
+                Exit.Execute();
+                break;
+            case "pwd":
+                PWD.Execute();
+                break;
+            default:
+                string commandPath = SearchPath(command);
+                if (commandPath.Length > 0)
+                    ExecuteProgram(command, string.Join(" ", arguments));
+                else CommandNotFound(command);
+                break;
         }
     }
 
@@ -109,7 +93,7 @@ class Shell
         Console.WriteLine($"{command}: not found");
     }
 
-    public static void LoadBuiltinCommands()
+    static void LoadBuiltinCommands()
     {
         IEnumerable<string> files = Directory.EnumerateFiles(BuiltinPath);
 
@@ -120,7 +104,7 @@ class Shell
         }
     }
 
-    public static void LoadPathBinaries()
+    static void LoadPathBinaries()
     {
         foreach (var folder in PATH)
         {
@@ -158,5 +142,23 @@ class Shell
         }
 
         return "";
+    }
+
+    static void ExecuteProgram(string command, string arguments)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = command,
+            Arguments = arguments,
+            RedirectStandardOutput = true,
+        };
+
+        using var process = new Process();
+        process.StartInfo = startInfo;
+        process.Start();
+
+        string output = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+        Console.Write(output);
     }
 }
