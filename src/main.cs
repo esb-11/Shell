@@ -1,80 +1,118 @@
 using System.Text;
 
-HashSet<string> builtin = ["exit", "echo", "type"];
-
-string input = "";
-while (input != "exit")
+class Shell
 {
-    input = Read();
-    if (input == "exit") break;
-    else if (input.Length == 0) return;
-    var (command, arguments) = ParseInput(input);
-    Evaluate(command, arguments);
-}
+    public static Boolean Exit = false;
+    public static readonly HashSet<string> BuiltinCommands = [];
+    public static string[] PATH = [];
+    public static readonly HashSet<string> PathBinaries = [];
+    public static readonly string BuiltinPath = "src/commands";
 
-string Read()
-{
-    Console.Write("$ ");
-    string input = Console.ReadLine() ?? "";
-
-    return input;
-}
-
-(string command, string arguments) ParseInput(string input)
-{
-    StringBuilder command = new();
-
-    foreach (char c in input)
+    static void Main(string[] args)
     {
-        if (c == ' ' && command.Length > 0)
+        PATH = Environment.GetEnvironmentVariable("PATH")?.Split(":") ?? [];
+        LoadPathBinaries();
+        LoadBuiltinCommands();
+        while (!Exit)
         {
-            break;
+            string input = Read();
+            if (input == "exit") break;
+            else if (input.Length == 0) continue;
+            var (command, arguments) = ParseInput(input);
+            Evaluate(command, arguments);
+        }
+    }
+
+    static string Read()
+    {
+        Console.Write("$ ");
+        string input = Console.ReadLine() ?? "";
+
+        return input;
+    }
+
+    static (string command, string[] arguments) ParseInput(string input)
+    {
+        StringBuilder sb = new();
+        string command = "";
+        List<string> arguments = [];
+
+        for (int i = 0; i <= input.Length; i++)
+        {
+            char c = i < input.Length ? input[i] : ' ';
+            // when we find an empty space, define the command as the current sb value
+            if (c == ' ' && command == "")
+            {
+                command = sb.ToString();
+                sb.Clear();
+            }
+            // after the command was found, start populating the arguments array
+            else if (c == ' ' && sb.Length > 0)
+            {
+                arguments.Add(sb.ToString());
+                sb.Clear();
+            }
+            else if (c != ' ')
+            {
+                sb.Append(c);
+            }
+        }
+
+        return (command, arguments.ToArray());
+    }
+
+    static void Evaluate(string command, string[] arguments)
+    {
+        if (command == "echo")
+        {
+            Echo.Execute(arguments);
+        }
+        else if (command == "type")
+        {
+            Type.Execute(arguments);
         }
         else
         {
-            command.Append(c);
+            CommandNotFound(command);
         }
     }
 
-    string arguments = input[command.Length..].Trim(' ');
-
-    return (command.ToString(), arguments);
-}
-
-void Evaluate(string command, string arguments)
-{
-    if (command == "echo")
+    public static void CommandNotFound(string command)
     {
-        Echo(arguments);
+        Console.WriteLine($"{command}: not found");
     }
-    else if (command == "type")
-    {
-        Type(arguments);
-    }
-    else
-    {
-        CommandNotFound(command);
-    }
-}
 
-void Echo(string arguments)
-{
-    Console.WriteLine(string.Join(" ", arguments));
-}
-
-void Type(string command)
-{
-    if (builtin.Contains(command))
+    public static void LoadBuiltinCommands()
     {
-        Console.WriteLine($"{command} is a shell builtin");
-    }
-    else
-    {
-        CommandNotFound(command);
-    }
-}
+        IEnumerable<string> files = Directory.EnumerateFiles(BuiltinPath);
 
-void CommandNotFound(string command)
-{
-    Console.WriteLine($"{command}: not found");
+        foreach (var file in files)
+        {
+            string fileName = file[..file.LastIndexOf('.')];
+            BuiltinCommands.Add(fileName);
+        }
+    }
+
+    public static void LoadPathBinaries()
+    {
+        foreach (var folder in PATH)
+        {
+            IEnumerable<string> files;
+            try
+            {
+                files = Directory.EnumerateFiles(folder);
+            }
+            catch (System.Exception)
+            {
+                files = [];
+            }
+
+            foreach (var file in files)
+            {
+                PathBinaries.Add(file);
+            }
+
+        }
+    }
+
 }
