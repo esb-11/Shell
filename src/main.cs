@@ -109,6 +109,8 @@ class Shell
 
             foreach (var file in files)
             {
+                UnixFileMode fileMode = File.GetUnixFileMode(file);
+                Console.WriteLine(fileMode);
                 PathBinaries.Add(file);
             }
 
