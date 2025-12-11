@@ -23,7 +23,7 @@ class Shell
         (Command, Arguments) = ParseInput(input);
     }
 
-    static (string command, List<string> arguments) ParseInput(string input)
+    static private (string command, List<string> arguments) ParseInput(string input)
     {
         StringBuilder sb = new();
         string command = "";
@@ -57,6 +57,8 @@ class Shell
     {
         if (Builtins.HasCommand(Command)) return Builtins.Run(Command, Arguments);
         else if (Env.Programs.ContainsKey(Command)) return ExecuteProgram();
+        Command = "";
+        Arguments = [];
         return $"{Command}: not found";
     }
 
