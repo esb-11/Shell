@@ -10,7 +10,7 @@ class Program
             shell.Read();
             if (shell.Command.Length == 0) continue;
             string result = shell.Eval();
-            Console.WriteLine(result);
+            if (result != string.Empty) Console.WriteLine(result);
         }
     }
 }
