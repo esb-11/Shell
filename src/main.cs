@@ -11,7 +11,7 @@ class Program
             if (shell.Command.Length == 0) continue;
 
             string result = shell.Eval();
-            if (result.Length > 0) Console.WriteLine(result);
+            if (result.Length > 0) Console.Write(result);
         }
     }
 }
