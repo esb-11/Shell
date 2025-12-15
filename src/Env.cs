@@ -36,6 +36,11 @@ public class Env
         }
     }
 
+    public Boolean HasProgram(string program)
+    {
+        return Programs.ContainsKey(program);
+    }
+
     public string GetDirectory()
     {
         return CurrentDirectory;

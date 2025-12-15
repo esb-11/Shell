@@ -56,7 +56,7 @@ class Shell
     public string Eval()
     {
         if (Builtins.HasCommand(Command)) return Builtins.Run(Command, Arguments);
-        else if (Env.Programs.ContainsKey(Command)) return ExecuteProgram();
+        else if (Env.HasProgram(Command)) return ExecuteProgram();
         Command = "";
         Arguments = [];
         return $"{Command}: not found";
