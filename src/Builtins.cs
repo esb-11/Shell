@@ -10,6 +10,7 @@ public class Builtins(Env env)
     public string Run(string command, List<string> args)
     {
         string result = Commands[command](args, Env);
+        if (string.IsNullOrEmpty(result)) return "";
         return result + "\n";
     }
 
