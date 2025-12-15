@@ -7,10 +7,11 @@ class Program
         Shell shell = new();
         while (shell.Command != "exit")
         {
-            string result = shell.Eval();
-            if (result.Length > 0) Console.WriteLine(result);
             shell.Read();
             if (shell.Command.Length == 0) continue;
+
+            string result = shell.Eval();
+            if (result.Length > 0) Console.WriteLine(result);
         }
     }
 }
