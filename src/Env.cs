@@ -50,6 +50,6 @@ public class Env
             return "";
         }
 
-        return $"cd: {dir}: No such file or directory.";
+        return $"cd: {dir}: No such file or directory";
     }
 }
