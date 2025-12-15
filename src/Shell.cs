@@ -35,7 +35,7 @@ class Shell
     {
         if (Builtins.HasCommand(Command)) return Builtins.Run(Command, Arguments);
         else if (Env.HasProgram(Command)) return ExecuteProgram();
-        return $"{Command}: not found";
+        return $"{Command}: not found\n";
     }
 
     private string ExecuteProgram()
