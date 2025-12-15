@@ -25,7 +25,8 @@ public class Builtins(Env env)
         builtins.Add("exit", (_, _) => "");
         builtins.Add("echo", (args, _) => string.Join(" ", args));
         builtins.Add("type", MakeType(builtins));
-        builtins.Add("pwd", (_, env) => env.CurrentDirectory);
+        builtins.Add("pwd", (_, env) => env.GetDirectory());
+        builtins.Add("cd", (args, env) => env.ChangeDirectory(args[0]));
 
         return builtins;
     }
