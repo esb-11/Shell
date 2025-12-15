@@ -10,7 +10,7 @@ public class Builtins(Env env)
     public string Run(string command, List<string> args)
     {
         string result = Commands[command](args, Env);
-        return result;
+        return result + "\n";
     }
 
     public Boolean HasCommand(string command)
